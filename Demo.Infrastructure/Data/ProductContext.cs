@@ -14,5 +14,10 @@ namespace Demo.Infrastructure.Data
         }   
         
         public DbSet<Product> Products { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        { 
+           //Entity konfigurasyonları  context üzerinde gerektikçe buraya tanımlanır. EF 
+        }
     }
 }

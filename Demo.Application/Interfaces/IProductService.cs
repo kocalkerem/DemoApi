@@ -13,6 +13,7 @@ namespace Demo.Application.Interfaces
         Task<IEnumerable<ProductModel>> GetProductByName(string productName);
         Task<IEnumerable<ProductModel>> GetProductByCategory(string category);
         Task<ProductModel> Create(ProductModel productModel);
+        Task<int> CreateProducts(IEnumerable<ProductModel> productModels);
         Task Update(ProductModel productModel);
         Task Delete(ProductModel productModel);
     }

@@ -14,6 +14,8 @@ using Demo.Infrastructure.Repository.Base;
 using AutoMapper;
 using Demo.Application.Interfaces;
 using Demo.Application.Services;
+using Demo.Core.UnitOfWork;
+using Demo.Infrastructure.UnitOfWork;
 
 namespace Catalog.API
 {
@@ -30,15 +32,19 @@ namespace Catalog.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-
+             
             services.AddDbContext<ProductContext>(c =>
                 c.UseSqlServer(Configuration.GetConnectionString("ProductConnection")), ServiceLifetime.Singleton);
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();//request lifecycle boyunca instance saklanýyor ve commit sýrasýnda istediðimiz datalar elimizde oluyor.
 
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped(typeof(IProductRepository), typeof(ProductRepository));
 
-            services.AddAutoMapper(typeof(Startup));
             services.AddScoped<IProductService, ProductService>();
+
+            services.AddAutoMapper(typeof(Startup));
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

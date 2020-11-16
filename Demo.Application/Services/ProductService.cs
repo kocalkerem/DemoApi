@@ -3,21 +3,27 @@ using Demo.Application.Mapper;
 using Demo.Application.Models;
 using Demo.Core.Entities;
 using Demo.Core.Repositories;
+using Demo.Core.UnitOfWork;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Demo.Application.Services
 {
     public class ProductService : IProductService
     {
-        private readonly IProductRepository _productRepository; 
+        private readonly IProductRepository _productRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ProductService(IProductRepository productRepository )
+        public ProductService(IProductRepository productRepository)//tran sız işlemler için tercih edilecek ctor
         {
             _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository)); 
             //loglama interface i inject edilip ilgili business logic lerde log atılabilir.
+        }
+
+        public ProductService(IUnitOfWork unitOfWork)//tran lı işlemler için tercih edilecek ctor
+        {
+            _unitOfWork = unitOfWork;       
         }
 
         public async Task<IEnumerable<ProductModel>> GetProductList()
@@ -47,6 +53,20 @@ namespace Demo.Application.Services
             var productList = await _productRepository.GetProductByCategory(category);
             var mapped = ObjectMapper.Mapper.Map<IEnumerable<ProductModel>>(productList);
             return mapped;
+        }
+
+        //bu metod IRepository AddRangeAsync metodu olarak implemente edilmesi daha doğru olur. 
+        //commit örneği vermek amaçlı metod eklendi.
+        public async Task<int> CreateProducts(IEnumerable<ProductModel> productModels)
+        {
+            var mapped = ObjectMapper.Mapper.Map<IEnumerable<Product>>(productModels);
+
+            foreach (var product in mapped)
+            {
+                await _unitOfWork.ProductRepository.AddAsync(product);
+            }
+
+           return await _unitOfWork.CommitAsync(); 
         }
 
         public async Task<ProductModel> Create(ProductModel productModel)
@@ -99,5 +119,7 @@ namespace Demo.Application.Services
             if (existingEntity == null)
                 throw new ApplicationException($"{productModel.ToString()} with this id is not exists");
         }
+
+
     }
 }
