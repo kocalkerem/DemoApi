@@ -1,10 +1,8 @@
 ﻿using Demo.Application.Interfaces;
 using Demo.Application.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -30,7 +28,9 @@ namespace Catalog.API.Controllers
             return Ok(list);
         }
 
-        [HttpGet("{category:length(24)}", Name = "GetProductByCategory")]
+        //[HttpGet("{category:length(24)}", Name = "GetProductByCategory")]
+        [HttpGet]
+        [Route("[action]/{category}")]
         [ProducesResponseType(typeof(IEnumerable<ProductModel>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<IEnumerable<ProductModel>>> GetProductByCategory(string category)
         {

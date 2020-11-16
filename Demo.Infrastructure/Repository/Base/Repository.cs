@@ -6,8 +6,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;   
+using System.Threading.Tasks;
 
 namespace Demo.Infrastructure.Repository.Base
 {
@@ -70,13 +69,13 @@ namespace Demo.Infrastructure.Repository.Base
             return entity;
         }
 
-        public async Task UpdateAsync(T entity)
+        public void Update(T entity)
         {
             _dbContext.Entry(entity).State = EntityState.Modified;
             //await _dbContext.SaveChangesAsync(); uof imp
         }
 
-        public async Task DeleteAsync(T entity)
+        public void Delete(T entity)
         {
             _dbContext.Set<T>().Remove(entity);
             //await _dbContext.SaveChangesAsync(); uof imp

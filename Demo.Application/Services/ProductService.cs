@@ -12,7 +12,7 @@ namespace Demo.Application.Services
 {
     public class ProductService : IProductService
     {
-        private readonly IProductRepository _productRepository;
+        //private readonly IProductRepository _productRepository;
         private readonly IUnitOfWork _unitOfWork;
 
         ////tran sız işlemler için tercih edilecek ctor
@@ -31,14 +31,14 @@ namespace Demo.Application.Services
         public async Task<IEnumerable<ProductModel>> GetProductList()
         {
             var productList = await _unitOfWork.ProductRepository.GetAllAsync();
-            var mapped = ObjectMapper.Mapper.Map<IEnumerable<ProductModel>>(productList);
+            var mapped = ProductMapper.Mapper.Map<IEnumerable<ProductModel>>(productList);
             return mapped;
         }
 
         public async Task<ProductModel> GetProductById(int productId)
         {
             var product = await _unitOfWork.ProductRepository.GetByIdAsync(productId);
-            var mapped = ObjectMapper.Mapper.Map<ProductModel>(product);
+            var mapped = ProductMapper.Mapper.Map<ProductModel>(product);
             return mapped;
         }
 
@@ -46,14 +46,14 @@ namespace Demo.Application.Services
         public async Task<IEnumerable<ProductModel>> GetProductByName(string productName)
         {
             var productList = await _unitOfWork.ProductRepository.GetProductByName(productName);
-            var mapped = ObjectMapper.Mapper.Map<IEnumerable<ProductModel>>(productList);
+            var mapped = ProductMapper.Mapper.Map<IEnumerable<ProductModel>>(productList);
             return mapped;
         }
 
         public async Task<IEnumerable<ProductModel>> GetProductByCategory(string category)
         {
             var productList = await _unitOfWork.ProductRepository.GetProductByCategory(category);
-            var mapped = ObjectMapper.Mapper.Map<IEnumerable<ProductModel>>(productList);
+            var mapped = ProductMapper.Mapper.Map<IEnumerable<ProductModel>>(productList);
             return mapped;
         }
 
@@ -61,11 +61,11 @@ namespace Demo.Application.Services
         //commit örneği vermek amaçlı metod eklendi.
         public async Task<int> CreateProducts(IEnumerable<ProductModel> productModels)
         {
-            var mapped = ObjectMapper.Mapper.Map<IEnumerable<Product>>(productModels);
+            var mapped = ProductMapper.Mapper.Map<IEnumerable<Product>>(productModels);
 
             foreach (var product in mapped)
             {
-                await _unitOfWork.ProductRepository.AddAsync(product);
+                _unitOfWork.ProductRepository.AddAsync(product);
             }
 
            return await _unitOfWork.CommitAsync(); 
@@ -75,13 +75,14 @@ namespace Demo.Application.Services
         {
             await ValidateProductIfExist(productModel);
 
-            var mappedEntity = ObjectMapper.Mapper.Map<Product>(productModel);
+            var mappedEntity = ProductMapper.Mapper.Map<Product>(productModel);
             if (mappedEntity == null)
                 throw new ApplicationException($"Entity could not be mapped.");
 
-            var newEntity = await _unitOfWork.ProductRepository.AddAsync(mappedEntity); 
+            var newEntity = await _unitOfWork.ProductRepository.AddAsync(mappedEntity);
+            await _unitOfWork.CommitAsync();
 
-            var newMappedEntity = ObjectMapper.Mapper.Map<ProductModel>(newEntity);
+            var newMappedEntity = ProductMapper.Mapper.Map<ProductModel>(newEntity);
             return newMappedEntity;
         } 
 
@@ -89,13 +90,16 @@ namespace Demo.Application.Services
         {
             ValidateProductIfNotExist(productModel);
 
+            var updatedEntity = ProductMapper.Mapper.Map<Product>(productModel);
+
             var editProduct = await _unitOfWork.ProductRepository.GetByIdAsync(productModel.Id);
             if (editProduct == null)
                 throw new ApplicationException($"Entity could not be loaded.");
 
-            ObjectMapper.Mapper.Map<ProductModel, Product>(productModel, editProduct);
+            editProduct = updatedEntity;
 
-            await _productRepository.UpdateAsync(editProduct); 
+            _unitOfWork.ProductRepository.Update(editProduct);
+            await _unitOfWork.CommitAsync();
         }
 
         public async Task Delete(ProductModel productModel)
@@ -105,23 +109,22 @@ namespace Demo.Application.Services
             if (deletedProduct == null)
                 throw new ApplicationException($"Entity could not be loaded.");
 
-            await _productRepository.DeleteAsync(deletedProduct); 
+            _unitOfWork.ProductRepository.Delete(deletedProduct);
+            await _unitOfWork.CommitAsync();
         }
 
         private async Task ValidateProductIfExist(ProductModel productModel)
         {
-            var existingEntity = await _productRepository.GetByIdAsync(productModel.Id);
+            var existingEntity = await _unitOfWork.ProductRepository.GetByIdAsync(productModel.Id);
             if (existingEntity != null)
-                throw new ApplicationException($"{productModel.ToString()} with this id already exists");
+                throw new ApplicationException($"{productModel.Id} with this id already exists");
         }
 
         private void ValidateProductIfNotExist(ProductModel productModel)
         {
-            var existingEntity = _productRepository.GetByIdAsync(productModel.Id);
+            var existingEntity = _unitOfWork.ProductRepository.GetByIdAsync(productModel.Id);
             if (existingEntity == null)
-                throw new ApplicationException($"{productModel.ToString()} with this id is not exists");
-        }
-
-
+                throw new ApplicationException($"{productModel.Id} with this id is not exists");
+        } 
     }
 }
