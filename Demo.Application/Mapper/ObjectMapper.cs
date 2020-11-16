@@ -27,7 +27,7 @@ namespace Demo.Application.Mapper
             {
                 cfg.CreateMap<Product, ProductModel>()
                     .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category)) 
-                    .ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src => src.Price))
+                    .ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src => src.Price)) 
                     .ReverseMap(); 
             });
         }

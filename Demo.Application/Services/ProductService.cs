@@ -15,11 +15,13 @@ namespace Demo.Application.Services
         private readonly IProductRepository _productRepository;
         private readonly IUnitOfWork _unitOfWork;
 
-        public ProductService(IProductRepository productRepository)//tran sız işlemler için tercih edilecek ctor
-        {
-            _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository)); 
-            //loglama interface i inject edilip ilgili business logic lerde log atılabilir.
-        }
+        ////tran sız işlemler için tercih edilecek ctor
+        ////şuanki yapıda ihtiyaç yok.
+        //public ProductService(IProductRepository productRepository)
+        //{
+        //    _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository)); 
+        //    //loglama interface i inject edilip ilgili business logic lerde log atılabilir.
+        //}
 
         public ProductService(IUnitOfWork unitOfWork)//tran lı işlemler için tercih edilecek ctor
         {
@@ -28,14 +30,14 @@ namespace Demo.Application.Services
 
         public async Task<IEnumerable<ProductModel>> GetProductList()
         {
-            var productList = await _productRepository.GetAllAsync();
+            var productList = await _unitOfWork.ProductRepository.GetAllAsync();
             var mapped = ObjectMapper.Mapper.Map<IEnumerable<ProductModel>>(productList);
             return mapped;
         }
 
         public async Task<ProductModel> GetProductById(int productId)
         {
-            var product = await _productRepository.GetByIdAsync(productId);
+            var product = await _unitOfWork.ProductRepository.GetByIdAsync(productId);
             var mapped = ObjectMapper.Mapper.Map<ProductModel>(product);
             return mapped;
         }
@@ -43,14 +45,14 @@ namespace Demo.Application.Services
 
         public async Task<IEnumerable<ProductModel>> GetProductByName(string productName)
         {
-            var productList = await _productRepository.GetProductByName(productName);
+            var productList = await _unitOfWork.ProductRepository.GetProductByName(productName);
             var mapped = ObjectMapper.Mapper.Map<IEnumerable<ProductModel>>(productList);
             return mapped;
         }
 
         public async Task<IEnumerable<ProductModel>> GetProductByCategory(string category)
         {
-            var productList = await _productRepository.GetProductByCategory(category);
+            var productList = await _unitOfWork.ProductRepository.GetProductByCategory(category);
             var mapped = ObjectMapper.Mapper.Map<IEnumerable<ProductModel>>(productList);
             return mapped;
         }
@@ -77,7 +79,7 @@ namespace Demo.Application.Services
             if (mappedEntity == null)
                 throw new ApplicationException($"Entity could not be mapped.");
 
-            var newEntity = await _productRepository.AddAsync(mappedEntity); 
+            var newEntity = await _unitOfWork.ProductRepository.AddAsync(mappedEntity); 
 
             var newMappedEntity = ObjectMapper.Mapper.Map<ProductModel>(newEntity);
             return newMappedEntity;
@@ -87,7 +89,7 @@ namespace Demo.Application.Services
         {
             ValidateProductIfNotExist(productModel);
 
-            var editProduct = await _productRepository.GetByIdAsync(productModel.Id);
+            var editProduct = await _unitOfWork.ProductRepository.GetByIdAsync(productModel.Id);
             if (editProduct == null)
                 throw new ApplicationException($"Entity could not be loaded.");
 
@@ -99,7 +101,7 @@ namespace Demo.Application.Services
         public async Task Delete(ProductModel productModel)
         {
             ValidateProductIfNotExist(productModel);
-            var deletedProduct = await _productRepository.GetByIdAsync(productModel.Id);
+            var deletedProduct = await _unitOfWork.ProductRepository.GetByIdAsync(productModel.Id);
             if (deletedProduct == null)
                 throw new ApplicationException($"Entity could not be loaded.");
 

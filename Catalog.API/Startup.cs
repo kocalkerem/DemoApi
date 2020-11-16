@@ -44,7 +44,11 @@ namespace Catalog.API
             services.AddScoped<IProductService, ProductService>();
 
             services.AddAutoMapper(typeof(Startup));
-            
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1" , new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Demo API" , Version = "v1" });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -64,6 +68,14 @@ namespace Catalog.API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+            });
+
+            //swagger middleware tanýmlama 
+            //end point tanýmlama
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Demo API V1");
             });
         }
     }
