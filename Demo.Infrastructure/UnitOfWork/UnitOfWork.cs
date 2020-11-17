@@ -3,14 +3,13 @@ using Demo.Core.UnitOfWork;
 using Demo.Infrastructure.Data;
 using Demo.Infrastructure.Repository;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Demo.Infrastructure.UnitOfWork
 {
     public class UnitOfWork : IUnitOfWork
     {
+        bool disposed; 
         private readonly ProductContext _context;
         private ProductRepository _productRepository;
 
@@ -25,10 +24,24 @@ namespace Demo.Infrastructure.UnitOfWork
         {
             return await _context.SaveChangesAsync();
         }
+         
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    //dispose managed resources
+                }
+            }
+            //dispose unmanaged resources
+            disposed = true;
+        }
 
         public void Dispose()
         {
-            _context.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

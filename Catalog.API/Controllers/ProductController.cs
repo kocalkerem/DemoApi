@@ -27,8 +27,7 @@ namespace Catalog.API.Controllers
             var list = await _productService.GetProductList();
             return Ok(list);
         }
-
-        //[HttpGet("{category:length(24)}", Name = "GetProductByCategory")]
+         
         [HttpGet]
         [Route("[action]/{category}")]
         [ProducesResponseType(typeof(IEnumerable<ProductModel>), (int)HttpStatusCode.OK)]
@@ -38,7 +37,8 @@ namespace Catalog.API.Controllers
             return Ok(list);
         }
 
-        [HttpGet("{name:length(24)}", Name = "GetProductByName")]
+        [HttpGet]
+        [Route("[action]/{name}")]
         [ProducesResponseType(typeof(IEnumerable<ProductModel>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<IEnumerable<ProductModel>>> GetProductByName(string name)
         {
@@ -48,19 +48,19 @@ namespace Catalog.API.Controllers
 
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(ProductModel), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<ProductModel>> GetProductById(int productId)
+        public async Task<ActionResult<ProductModel>> GetProductById(int id)
         {
-            var prd = await _productService.GetProductById(productId);
+            var prd = await _productService.GetProductById(id);
             return Ok(prd);
         }
 
 
-        [HttpPost("")]
+        [HttpPost]
         [ProducesResponseType(typeof(ProductModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> Create([FromBody] ProductModel model)
         {
-            await _productService.Create(model);
-            return Ok();
+           var newEntity =  await _productService.Create(model);
+            return Ok(newEntity);
         }
 
         [HttpPost("{models}", Name = "CreateProducts")]

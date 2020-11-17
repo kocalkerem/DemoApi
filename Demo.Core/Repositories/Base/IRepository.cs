@@ -22,7 +22,7 @@ namespace Demo.Core.Repositories.Base
                                         bool disableTracking = true);
         Task<T> GetByIdAsync(int id);
         Task<T> AddAsync(T entity);
-        void Update(T entity);
-        void Delete(T entity);
+        Task Update(T entity);
+        Task Delete(T entity);
     }
 }

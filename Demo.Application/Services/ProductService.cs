@@ -88,7 +88,7 @@ namespace Demo.Application.Services
 
         public async Task Update(ProductModel productModel)
         {
-            ValidateProductIfNotExist(productModel);
+            await ValidateProductIfNotExist(productModel);
 
             var updatedEntity = ProductMapper.Mapper.Map<Product>(productModel);
 
@@ -96,20 +96,23 @@ namespace Demo.Application.Services
             if (editProduct == null)
                 throw new ApplicationException($"Entity could not be loaded.");
 
-            editProduct = updatedEntity;
+            editProduct.Category = updatedEntity.Category;
+            editProduct.Name = updatedEntity.Name;
+            editProduct.Price = updatedEntity.Price;
+            editProduct.Description = updatedEntity.Description;
 
-            _unitOfWork.ProductRepository.Update(editProduct);
+            await _unitOfWork.ProductRepository.Update(editProduct);
             await _unitOfWork.CommitAsync();
         }
 
         public async Task Delete(ProductModel productModel)
         {
-            ValidateProductIfNotExist(productModel);
+            await ValidateProductIfNotExist(productModel);
             var deletedProduct = await _unitOfWork.ProductRepository.GetByIdAsync(productModel.Id);
             if (deletedProduct == null)
                 throw new ApplicationException($"Entity could not be loaded.");
 
-            _unitOfWork.ProductRepository.Delete(deletedProduct);
+            await _unitOfWork.ProductRepository.Delete(deletedProduct);
             await _unitOfWork.CommitAsync();
         }
 
@@ -120,9 +123,9 @@ namespace Demo.Application.Services
                 throw new ApplicationException($"{productModel.Id} with this id already exists");
         }
 
-        private void ValidateProductIfNotExist(ProductModel productModel)
+        private async Task ValidateProductIfNotExist(ProductModel productModel)
         {
-            var existingEntity = _unitOfWork.ProductRepository.GetByIdAsync(productModel.Id);
+            var existingEntity = await _unitOfWork.ProductRepository.GetByIdAsync(productModel.Id);
             if (existingEntity == null)
                 throw new ApplicationException($"{productModel.Id} with this id is not exists");
         } 

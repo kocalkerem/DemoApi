@@ -69,13 +69,13 @@ namespace Demo.Infrastructure.Repository.Base
             return entity;
         }
 
-        public void Update(T entity)
+        public async Task Update(T entity)
         {
-            _dbContext.Entry(entity).State = EntityState.Modified;
+             _dbContext.Entry(entity).State = EntityState.Modified;
             //await _dbContext.SaveChangesAsync(); uof imp
         }
 
-        public void Delete(T entity)
+        public async Task Delete(T entity)
         {
             _dbContext.Set<T>().Remove(entity);
             //await _dbContext.SaveChangesAsync(); uof imp
